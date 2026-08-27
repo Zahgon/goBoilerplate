@@ -1,27 +1,27 @@
-<a href="https://echo.labstack.com"><img height="80" src="https://cdn.labstack.com/images/echo-logo.svg"></a>
+<a href="https://gin-gonic.com"><img height="80" src="https://raw.githubusercontent.com/gin-gonic/logo/master/color.png"></a>
 
-[![Sourcegraph](https://sourcegraph.com/github.com/labstack/echo/-/badge.svg?style=flat-square)](https://sourcegraph.com/github.com/labstack/echo?badge)
-[![GoDoc](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)](http://godoc.org/github.com/labstack/echo)
-[![Go Report Card](https://goreportcard.com/badge/github.com/labstack/echo?style=flat-square)](https://goreportcard.com/report/github.com/labstack/echo)
-[![Join the chat at https://gitter.im/labstack/echo](https://img.shields.io/badge/gitter-join%20chat-brightgreen.svg?style=flat-square)](https://gitter.im/labstack/echo)
-[![Forum](https://img.shields.io/badge/community-forum-00afd1.svg?style=flat-square)](https://forum.labstack.com)
-[![Twitter](https://img.shields.io/badge/twitter-@labstack-55acee.svg?style=flat-square)](https://twitter.com/labstack)
-[![License](http://img.shields.io/badge/license-mit-blue.svg?style=flat-square)](https://raw.githubusercontent.com/labstack/echo/master/LICENSE)
+[![Sourcegraph](https://sourcegraph.com/github.com/gin-gonic/gin/-/badge.svg?style=flat-square)](https://sourcegraph.com/github.com/gin-gonic/gin?badge)
+[![GoDoc](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)](http://godoc.org/github.com/gin-gonic/gin)
+[![Go Report Card](https://goreportcard.com/badge/github.com/gin-gonic/gin?style=flat-square)](https://goreportcard.com/report/github.com/gin-gonic/gin)
+[![Join the chat at https://gitter.im/gin-gonic/gin](https://img.shields.io/badge/gitter-join%20chat-brightgreen.svg?style=flat-square)](https://gitter.im/gin-gonic/gin)
+[![Forum](https://img.shields.io/badge/community-forum-00afd1.svg?style=flat-square)](https://github.com/gin-gonic/gin/discussions)
+[![Twitter](https://img.shields.io/badge/twitter-@gin__gonic-55acee.svg?style=flat-square)](https://twitter.com/gin_gonic)
+[![License](http://img.shields.io/badge/license-mit-blue.svg?style=flat-square)](https://raw.githubusercontent.com/gin-gonic/gin/master/LICENSE)
 
 ## Feature Overview
 
--   Optimized HTTP router which smartly prioritize routes
+-   Zero allocation radix tree router which smartly prioritize routes
 -   Build robust and scalable RESTful APIs
 -   Group APIs
 -   Extensible middleware framework
 -   Define middleware at root, group or route level
 -   Data binding for JSON, XML and form payload
 -   Handy functions to send variety of HTTP responses
--   Centralized HTTP error handling
+-   Centralized error management
 -   Template rendering with any template engine
 -   Define your format for the logger
 -   Highly customizable
--   Automatic TLS via Let’s Encrypt
+-   Crash-free, recovers from any panic
 -   HTTP/2 support
 
 ## How to run

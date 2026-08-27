@@ -3,26 +3,28 @@ package tests
 import (
 	"encoding/json"
 	"goBoilterplate/app/controllers"
+	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"strings"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestHome(t *testing.T) {
-	e := echo.New()
+const formContentType = "application/x-www-form-urlencoded"
 
-	req := httptest.NewRequest(echo.GET, "/", nil)
+func TestHome(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 
-	c := e.NewContext(req, rec)
+	c, _ := gin.CreateTestContext(rec)
+	c.Request = req
 
-	if assert.NoError(t, controllers.Index(c)) {
-		assert.Equal(t, 200, rec.Code)
-	}
+	controllers.Index(c)
+
+	assert.Equal(t, 200, rec.Code)
 }
 
 type Login struct {
@@ -32,28 +34,27 @@ type Login struct {
 var JWT *Login
 
 func TestLogin(t *testing.T) {
-	e := echo.New()
-
 	// User found
 
 	f := make(url.Values)
 	f.Set("email", "andres@teachlr.org")
 	f.Set("password", "123456")
 
-	req := httptest.NewRequest(echo.POST, "/login", strings.NewReader(f.Encode()))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
+	req := httptest.NewRequest(http.MethodPost, "/login", strings.NewReader(f.Encode()))
+	req.Header.Set("Content-Type", formContentType)
 	rec := httptest.NewRecorder()
 
-	c := e.NewContext(req, rec)
+	c, _ := gin.CreateTestContext(rec)
+	c.Request = req
 
-	if assert.NoError(t, controllers.Login(c)) {
-		if err := json.NewDecoder(rec.Body).Decode(&JWT); err != nil {
-			panic(err)
-		}
-		req.Body.Close()
+	controllers.Login(c)
 
-		assert.Equal(t, 200, rec.Code)
+	if err := json.NewDecoder(rec.Body).Decode(&JWT); err != nil {
+		panic(err)
 	}
+	req.Body.Close()
+
+	assert.Equal(t, 200, rec.Code)
 
 	// User not found
 
@@ -61,13 +62,14 @@ func TestLogin(t *testing.T) {
 	f.Set("email", "andres@teachlr.org")
 	f.Set("password", "1234567")
 
-	req = httptest.NewRequest(echo.POST, "/login", strings.NewReader(f.Encode()))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
+	req = httptest.NewRequest(http.MethodPost, "/login", strings.NewReader(f.Encode()))
+	req.Header.Set("Content-Type", formContentType)
 	rec = httptest.NewRecorder()
 
-	c = e.NewContext(req, rec)
+	c, _ = gin.CreateTestContext(rec)
+	c.Request = req
 
-	if assert.NoError(t, controllers.Login(c)) {
-		assert.Equal(t, 404, rec.Code)
-	}
+	controllers.Login(c)
+
+	assert.Equal(t, 404, rec.Code)
 }

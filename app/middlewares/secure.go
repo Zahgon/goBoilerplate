@@ -3,20 +3,19 @@ package middlewares
 import (
 	"strings"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/gin-gonic/gin"
 )
 
 // Secure Middleware
-func Secure() echo.MiddlewareFunc {
-	return middleware.SecureWithConfig(middleware.SecureConfig{
-		XSSProtection:         "1; mode=block",
-		ContentTypeNosniff:    "nosniff",
-		XFrameOptions:         "SAMEORIGIN",
-		HSTSMaxAge:            0,
-		ContentSecurityPolicy: "",
-		Skipper: func(c echo.Context) bool {
-			return strings.Contains(c.Path(), "/docs")
-		},
-	})
+func Secure() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if strings.Contains(c.FullPath(), "/docs") {
+			return
+		}
+
+		header := c.Writer.Header()
+		header.Set("X-XSS-Protection", "1; mode=block")
+		header.Set("X-Content-Type-Options", "nosniff")
+		header.Set("X-Frame-Options", "SAMEORIGIN")
+	}
 }

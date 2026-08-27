@@ -6,7 +6,7 @@ import (
 	"goBoilterplate/app/models"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/gin-gonic/gin"
 )
 
 // Index godoc
@@ -19,8 +19,8 @@ import (
 // @Failure 404 {string} string
 // @Failure 500 {string} string
 // @Router / [get]
-func Index(c echo.Context) error {
-	return c.JSON(200, "Welcome to Echo")
+func Index(c *gin.Context) {
+	helpers.JSON(c, 200, "Welcome to Echo")
 }
 
 // Login godoc
@@ -34,25 +34,28 @@ func Index(c echo.Context) error {
 // @Failure 404 {string} string
 // @Failure 500 {string} string
 // @Router /api/login [post]
-func Login(c echo.Context) error {
+func Login(c *gin.Context) {
 	login := models.Login{}
-	login.Email = c.FormValue("email")
-	login.Password = c.FormValue("password")
+	login.Email = c.Request.FormValue("email")
+	login.Password = c.Request.FormValue("password")
 
 	err := helpers.Validate(&login)
 	if err != nil {
-		return c.JSON(422, err)
+		helpers.JSON(c, 422, err)
+		return
 	}
 
 	user := models.AuthLogin(login.Email, login.Password)
 	if user != nil {
 		token, err := helpers.AuthMakeToken(user)
 		if err != nil {
-			return c.JSON(500, "Server Error")
+			helpers.JSON(c, 500, "Server Error")
+			return
 		}
-		return c.JSON(200, map[string]string{"token": token})
+		helpers.JSON(c, 200, map[string]string{"token": token})
+		return
 	}
-	return c.JSON(404, "Not Found")
+	helpers.JSON(c, 404, "Not Found")
 }
 
 // Logout godoc
@@ -64,17 +67,19 @@ func Login(c echo.Context) error {
 // @Success 200 {string} string
 // @Failure 401 {string} string
 // @Router /api/logout [get]
-func Logout(c echo.Context) error {
+func Logout(c *gin.Context) {
 	user := helpers.AuthGetUser(c)
 	if user != nil {
-		return c.JSON(200, user)
+		helpers.JSON(c, 200, user)
+		return
 	}
-	return c.JSON(401, "Unauthorized")
+	helpers.JSON(c, 401, "Unauthorized")
 }
 
 // Test godoc
-func Test(c echo.Context) error {
-	req := c.Request()
+func Test(c *gin.Context) {
+	req := c.Request
 	format := `<code> Protocol: %s<br> Host: %s<br> Method: %s<br> Path: %s<br> </code>`
-	return c.HTML(http.StatusOK, fmt.Sprintf(format, req.Proto, req.Host, req.Method, req.URL.Path))
+	c.Data(http.StatusOK, "text/html; charset=UTF-8",
+		[]byte(fmt.Sprintf(format, req.Proto, req.Host, req.Method, req.URL.Path)))
 }

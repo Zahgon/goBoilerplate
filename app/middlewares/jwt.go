@@ -1,26 +1,66 @@
 package middlewares
 
 import (
+	"fmt"
+	"goBoilterplate/app/helpers"
 	"os"
 	"strings"
 
-	echojwt "github.com/labstack/echo-jwt/v4"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 )
 
-func Jwt() echo.MiddlewareFunc {
+const jwtAuthScheme = "Bearer "
+
+// Jwt Middleware
+func Jwt() gin.HandlerFunc {
 	secret := os.Getenv("APP_KEY")
-	return echojwt.WithConfig(echojwt.Config{
-		SigningKey: []byte(secret),
-		ContextKey: "token",
-		Skipper: middleware.Skipper(func(c echo.Context) bool {
-			return strings.Contains(c.Path(), "/login")
-		}),
-		ErrorHandler: func(c echo.Context, err error) error {
-			return c.JSON(401, map[string]interface{}{
-				"message": "Unauthorized",
-			})
-		},
+
+	return func(c *gin.Context) {
+		if strings.Contains(c.FullPath(), "/login") {
+			return
+		}
+
+		token, err := parseJwt(c, secret)
+		if err != nil {
+			jwtUnauthorized(c)
+			return
+		}
+
+		c.Set("token", token)
+	}
+}
+
+func parseJwt(c *gin.Context, secret string) (*jwt.Token, error) {
+	authHeader := c.Request.Header.Get("Authorization")
+	if !strings.HasPrefix(authHeader, jwtAuthScheme) {
+		return nil, fmt.Errorf("missing or malformed jwt")
+	}
+
+	tokenString := strings.TrimPrefix(authHeader, jwtAuthScheme)
+	if tokenString == "" {
+		return nil, fmt.Errorf("missing or malformed jwt")
+	}
+
+	token, err := jwt.ParseWithClaims(tokenString, jwt.MapClaims{}, func(t *jwt.Token) (interface{}, error) {
+		if t.Method.Alg() != jwt.SigningMethodHS256.Alg() {
+			return nil, fmt.Errorf("unexpected jwt signing method=%v", t.Header["alg"])
+		}
+		return []byte(secret), nil
 	})
+	if err != nil {
+		return nil, err
+	}
+	if !token.Valid {
+		return nil, fmt.Errorf("invalid token")
+	}
+
+	return token, nil
+}
+
+func jwtUnauthorized(c *gin.Context) {
+	helpers.JSON(c, 401, map[string]interface{}{
+		"message": "Unauthorized",
+	})
+	c.Abort()
 }

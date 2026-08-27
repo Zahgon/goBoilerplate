@@ -5,7 +5,7 @@ import (
 	"goBoilterplate/app/models"
 	"strconv"
 
-	"github.com/labstack/echo/v4"
+	"github.com/gin-gonic/gin"
 )
 
 // UserList godoc
@@ -16,12 +16,13 @@ import (
 // @Security ApiKeyAuth
 // @Success 200 {array} models.User
 // @Router /api/users [get]
-func UserList(c echo.Context) error {
+func UserList(c *gin.Context) {
 	users := models.UserProfileList()
 	if users != nil {
-		return c.JSON(200, users)
+		helpers.JSON(c, 200, users)
+		return
 	}
-	return c.JSON(204, "No Content")
+	helpers.JSON(c, 204, "No Content")
 }
 
 // UserStore godoc
@@ -38,23 +39,25 @@ func UserList(c echo.Context) error {
 // @Failure 422 {string} string
 // @Failure 400 {string} string
 // @Router /api/users [post]
-func UserStore(c echo.Context) error {
+func UserStore(c *gin.Context) {
 	user := models.User{}
-	user.Username = c.FormValue("username")
-	user.Email = c.FormValue("email")
-	user.Password = c.FormValue("password")
-	user.Role = c.FormValue("role")
+	user.Username = c.Request.FormValue("username")
+	user.Email = c.Request.FormValue("email")
+	user.Password = c.Request.FormValue("password")
+	user.Role = c.Request.FormValue("role")
 
 	err := helpers.Validate(&user)
 	if err != nil {
-		return c.JSON(422, err)
+		helpers.JSON(c, 422, err)
+		return
 	}
 
 	res := models.UserStore(&user)
 	if res {
-		return c.JSON(201, user)
+		helpers.JSON(c, 201, user)
+		return
 	}
-	return c.JSON(400, "Bad Request")
+	helpers.JSON(c, 400, "Bad Request")
 }
 
 // UserShow godoc
@@ -68,16 +71,18 @@ func UserStore(c echo.Context) error {
 // @Failure 400 {string} string
 // @Failure 404 {string} string
 // @Router /api/users/{id} [get]
-func UserShow(c echo.Context) error {
+func UserShow(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err == nil {
 		user := models.UserProfileShow(id)
 		if user != nil {
-			return c.JSON(200, user)
+			helpers.JSON(c, 200, user)
+			return
 		}
-		return c.JSON(404, "Not Found")
+		helpers.JSON(c, 404, "Not Found")
+		return
 	}
-	return c.JSON(400, "Bad Request")
+	helpers.JSON(c, 400, "Bad Request")
 }
 
 // UserUpdate godoc
@@ -96,30 +101,33 @@ func UserShow(c echo.Context) error {
 // @Failure 400 {string} string
 // @Failure 404 {string} string
 // @Router /api/users/{id} [put]
-func UserUpdate(c echo.Context) error {
+func UserUpdate(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err == nil {
 		user := models.UserShow(id)
 		if user != nil {
-			user.Username = c.FormValue("username")
-			user.Email = c.FormValue("email")
-			user.Password = c.FormValue("password")
-			user.Role = c.FormValue("role")
+			user.Username = c.Request.FormValue("username")
+			user.Email = c.Request.FormValue("email")
+			user.Password = c.Request.FormValue("password")
+			user.Role = c.Request.FormValue("role")
 
 			err := helpers.Validate(user)
 			if err != nil {
-				return c.JSON(422, err)
+				helpers.JSON(c, 422, err)
+				return
 			}
 
 			res := models.UserUpdate(user)
 			if res {
-				return c.JSON(200, user)
+				helpers.JSON(c, 200, user)
+				return
 			}
 		} else {
-			return c.JSON(404, "Not Found")
+			helpers.JSON(c, 404, "Not Found")
+			return
 		}
 	}
-	return c.JSON(400, "Bad Request")
+	helpers.JSON(c, 400, "Bad Request")
 }
 
 // UserDelete godoc
@@ -133,14 +141,16 @@ func UserUpdate(c echo.Context) error {
 // @Failure 400 {string} string
 // @Failure 404 {string} string
 // @Router /api/users/{id} [delete]
-func UserDelete(c echo.Context) error {
+func UserDelete(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err == nil {
 		res := models.UserDelete(id)
 		if res {
-			return c.JSON(200, "Deleted")
+			helpers.JSON(c, 200, "Deleted")
+			return
 		}
-		return c.JSON(404, "Not Found")
+		helpers.JSON(c, 404, "Not Found")
+		return
 	}
-	return c.JSON(400, "Bad Request")
+	helpers.JSON(c, 400, "Bad Request")
 }

@@ -7,22 +7,22 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/labstack/echo/v4"
 )
 
 // GetAuthorizationToken helper to get token from header
-func GetAuthorizationToken(c echo.Context) (string, error) {
-	authHeader := c.Request().Header.Get("Authorization")
+func GetAuthorizationToken(c *gin.Context) (string, error) {
+	authHeader := c.Request.Header.Get("Authorization")
 	if authHeader == "" {
-		return "", echo.NewHTTPError(http.StatusBadRequest, "Unauthorized")
+		return "", NewHTTPError(http.StatusBadRequest, "Unauthorized")
 	}
 
 	if strings.HasPrefix(authHeader, "Bearer ") {
 		return strings.TrimPrefix(authHeader, "Bearer "), nil
 	}
 
-	return "", echo.NewHTTPError(http.StatusBadRequest, "Unauthorized")
+	return "", NewHTTPError(http.StatusBadRequest, "Unauthorized")
 }
 
 // AuthMakeToken helper to make a token from user
@@ -41,7 +41,7 @@ func AuthMakeToken(user *models.User) (string, error) {
 }
 
 // AuthGetUser helper to retrieve the user from token
-func AuthGetUser(c echo.Context) *models.User {
+func AuthGetUser(c *gin.Context) *models.User {
 	secret := os.Getenv("APP_KEY")
 
 	tokenString, err := GetAuthorizationToken(c)

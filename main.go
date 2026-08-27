@@ -4,10 +4,11 @@ import (
 	"goBoilterplate/app/console"
 	"goBoilterplate/app/router"
 	"goBoilterplate/config"
+	"net/http"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/labstack/echo/v4"
 	"gopkg.in/tylerb/graceful.v1"
 )
 
@@ -20,7 +21,7 @@ import (
 // @name Authorization
 
 func main() {
-	app := echo.New()
+	app := gin.New()
 
 	db := config.Database()
 	defer db.Close()
@@ -29,6 +30,6 @@ func main() {
 	console.Schedule()
 	router.Init(app)
 
-	app.Server.Addr = ":3000"
-	graceful.ListenAndServe(app.Server, 5*time.Second)
+	server := &http.Server{Addr: ":3000", Handler: app}
+	graceful.ListenAndServe(server, 5*time.Second)
 }
